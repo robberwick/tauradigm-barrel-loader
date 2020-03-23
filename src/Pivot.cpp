@@ -4,20 +4,20 @@
 
 #include "Arduino.h"
 
-Pivot::Pivot(int pin) : _msRed(1000), _msGreen(2000), _msCentre(1500) {
+Pivot::Pivot(int pin) : _degRed(55), _degGreen(110), _degCentre(82) {
     pinMode(pin, OUTPUT);
     _pin = pin;
     _servo.attach(pin);
 }
 
 void Pivot::red() {
-    _servo.writeMicroseconds(_msRed);
+    _servo.write(_degRed);
 }
 
 void Pivot::green() {
-    _servo.writeMicroseconds(_msGreen);
+    _servo.write(_degGreen);
 }
 
 void Pivot::reset() {
-    _servo.writeMicroseconds(_msCentre);
+    _servo.write(_degCentre);
 }

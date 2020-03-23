@@ -28,8 +28,8 @@ enum class Command {
     RUN
 };
 
-unsigned long GRABBING_TIMEOUT = 3000;
-unsigned long LIFTING_TIMEOUT = 3000;
+unsigned long GRABBING_TIMEOUT = 10;
+unsigned long LIFTING_TIMEOUT = 60;
 unsigned long RESET_TIMEOUT = max(GRABBING_TIMEOUT, LIFTING_TIMEOUT);
 
 State state = State::WAIT;
@@ -37,13 +37,13 @@ Command currentCommand = Command::STOP;
 
 uint8_t I2C_ADDR = 4;
 
-uint8_t jawsPin = 2;
+uint8_t jawsPin = 0;
 Jaws jaws(jawsPin);
 
-uint8_t lifterPin = 3;
+uint8_t lifterPin = 2;
 Lifter lifter(lifterPin);
 
-uint8_t pivotPin = 4;
+uint8_t pivotPin = 1;
 Pivot pivot(pivotPin);
 
 void receiveEvent(int bytesRead);

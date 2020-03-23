@@ -14,8 +14,8 @@ class Lifter {
    private:
     int _pin;
     Servo _servo;
-    uint16_t _msUp;
-    uint16_t _msDown;
+    uint16_t _degUp;
+    uint16_t _degDown;
 };
 
 #endif

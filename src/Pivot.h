@@ -15,9 +15,9 @@ class Pivot {
    private:
     int _pin;
     Servo _servo;
-    uint16_t _msRed;
-    uint16_t _msGreen;
-    uint16_t _msCentre;
+    uint16_t _degRed;
+    uint16_t _degGreen;
+    uint16_t _degCentre;
 };
 
 #endif

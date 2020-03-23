@@ -4,16 +4,16 @@
 
 #include "Arduino.h"
 
-Lifter::Lifter(int pin) : _msUp(1000), _msDown(2000) {
+Lifter::Lifter(int pin) : _degUp(55), _degDown(123) {
     pinMode(pin, OUTPUT);
     _pin = pin;
     _servo.attach(pin);
 }
 
 void Lifter::up() {
-    _servo.writeMicroseconds(_msUp);
+    _servo.write(_degUp);
 }
 
 void Lifter::down() {
-    _servo.writeMicroseconds(_msDown);
+    _servo.write(_degDown);
 }

@@ -14,8 +14,8 @@ class Jaws {
    private:
     int _pin;
     Servo _servo;
-    uint16_t _msOpen;
-    uint16_t _msClosed;
+    uint16_t _degOpen;
+    uint16_t _degClosed;
 };
 
 #endif

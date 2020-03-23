@@ -4,16 +4,16 @@
 
 #include "Arduino.h"
 
-Jaws::Jaws(int pin) : _msOpen(1000), _msClosed(2000) {
+Jaws::Jaws(int pin) : _degOpen(140), _degClosed(90) {
     pinMode(pin, OUTPUT);
     _pin = pin;
     _servo.attach(pin);
 }
 
 void Jaws::open() {
-    _servo.writeMicroseconds(_msOpen);
+    _servo.write(_degOpen);
 }
 
 void Jaws::close() {
-    _servo.writeMicroseconds(_msClosed);
+    _servo.write(_degClosed);
 }
