@@ -28,9 +28,10 @@ enum class Command {
     RUN
 };
 
-unsigned long GRABBING_TIMEOUT = 10;
-unsigned long LIFTING_TIMEOUT = 60;
-unsigned long RESET_TIMEOUT = max(GRABBING_TIMEOUT, LIFTING_TIMEOUT);
+unsigned long GRABBING_TIMEOUT = 50 * 10;
+unsigned long LIFTING_TIMEOUT = 68 * 60;
+unsigned long PIVOT_TIMEOUT = 28 * 40;
+unsigned long RESET_TIMEOUT = max(PIVOT_TIMEOUT, max(GRABBING_TIMEOUT, LIFTING_TIMEOUT));
 
 State state = State::WAIT;
 Command currentCommand = Command::STOP;
