@@ -101,12 +101,10 @@ boolean findBarrel() {
 }
 
 void processStatus() {
-    static long startMillis;
     if ((currentCommand == Command::STOP) && (state != State::WAIT && state != State::RESETTING)) {
         lifter.down();
         pivot.reset();
         jaws.open();
-        startMillis = millis();
         state = State::RESETTING;
     }
 
@@ -121,8 +119,6 @@ void processStatus() {
         case State::LOOKING:
             // LOOKING FOR BARREL
             if (findBarrel()) {
-                // reset startMillis
-                startMillis = millis();
                 // close jaws
                 jaws.close();
                 // set state to GRABBING
@@ -131,9 +127,11 @@ void processStatus() {
             break;
 
         case State::GRABBING:
-            // GRABBING - wait for the timeout to complete before moving to GRABBED
-            if (timeoutHasPassed(startMillis, GRABBING_TIMEOUT)) {
+            // GRABBING - wait for the Jaws status to be CLOSED before moving to GRABBED
+            if (jaws.getStatus() == Jaws::Status::CLOSED) {
                 state = State::GRABBED;
+            } else {
+                jaws.update();
             }
 
             break;
@@ -145,8 +143,7 @@ void processStatus() {
                     // Set lifting servo to up position
                     lifter.up();
                     // set pivot servo to red position
-                    pivot.red();
-                    startMillis = millis();
+                    pivot.setPosition(Pivot::Position::RED);
                     state = State::LIFTING;
                     break;
 
@@ -154,8 +151,7 @@ void processStatus() {
                     // Set lifting servo to up position
                     lifter.up();
                     // set pivot servo to green position
-                    pivot.green();
-                    startMillis = millis();
+                    pivot.setPosition(Pivot::Position::GREEN);
                     state = State::LIFTING;
                     break;
             }
@@ -165,25 +161,28 @@ void processStatus() {
 
         case State::LIFTING:
             // if the LIFTING TIMEOUT has expired, open the jaws and move to RELEASING
-            if (timeoutHasPassed(startMillis, LIFTING_TIMEOUT)) {
+            if (lifter.getStatus() == Lifter::Status::UP) {
                 // Open the Jaws
                 jaws.open();
-                startMillis = millis();
                 state = State::RELEASING;
+            } else {
+                lifter.update();
             }
+
             break;
 
         case State::RELEASING:
-            if (timeoutHasPassed(startMillis, GRABBING_TIMEOUT)) {
+            if (jaws.getStatus() == Jaws::Status::OPEN) {
                 lifter.down();
                 pivot.reset();
-                startMillis = millis();
                 state = State::RESETTING;
+            } else {
+                jaws.update();
             }
             break;
 
         case State::RESETTING:
-            if (timeoutHasPassed(startMillis, RESET_TIMEOUT)) {
+            if (lifter.getStatus() == Lifter::Status::DOWN && pivot.getStatus() == Pivot::Status::STOPPED) {
                 switch (currentCommand) {
                     case Command::RUN:
                         state = State::LOOKING;
@@ -192,6 +191,9 @@ void processStatus() {
                         state = State::WAIT;
                         break;
                 }
+            } else {
+                lifter.update();
+                pivot.update();
             }
     }
 }
