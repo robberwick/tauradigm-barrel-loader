@@ -4,8 +4,9 @@
 
 #include "Arduino.h"
 
-Lifter::Lifter(uint8_t pin) {
+Lifter::Lifter(uint8_t pin, uint32_t stepTime) {
     _pin = pin;
+    _msStepTime = stepTime;
 }
 
 void Lifter::begin() {

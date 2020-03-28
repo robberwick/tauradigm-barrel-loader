@@ -39,13 +39,13 @@ Command currentCommand = Command::STOP;
 uint8_t I2C_ADDR = 4;
 
 uint8_t jawsPin = 12;  //0;
-Jaws jaws(jawsPin);
+Jaws jaws(jawsPin, 10);
 
-uint8_t lifterPin = 11;  //2;
-Lifter lifter(lifterPin);
+uint8_t lifterPin = 11;        //2;
+Lifter lifter(lifterPin, 10);  // 60 is the original value from the test rig
 
 uint8_t pivotPin = 10;  //1;
-Pivot pivot(pivotPin);
+Pivot pivot(pivotPin, 10);
 
 void receiveEvent(int bytesRead);
 void requestEvent();

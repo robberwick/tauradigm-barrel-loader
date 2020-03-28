@@ -4,8 +4,9 @@
 
 #include "Arduino.h"
 
-Jaws::Jaws(uint8_t pin) {
+Jaws::Jaws(uint8_t pin, uint32_t stepTime) {
     _pin = pin;
+    _msStepTime = stepTime;
 }
 
 void Jaws::begin() {

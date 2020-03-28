@@ -13,7 +13,7 @@ class Lifter {
         LIFTING,
         LOWERING
     };
-    Lifter(uint8_t pin);
+    Lifter(uint8_t pin, uint32_t stepTime);
     void begin();
     void up();
     void down();
@@ -26,7 +26,7 @@ class Lifter {
     uint16_t _degUp = 55;
     uint16_t _degDown = 123;
     Status _status;
-    uint32_t _msStepTime = 10;  //60;
+    uint32_t _msStepTime;
     uint32_t _startMillis;
     uint8_t _degPos;
 };

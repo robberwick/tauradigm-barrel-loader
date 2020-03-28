@@ -13,7 +13,7 @@ class Jaws {
         OPENING,
         CLOSING
     };
-    Jaws(uint8_t pin);
+    Jaws(uint8_t pin, uint32_t stepTime);
     void begin();
     void open();
     void close();
@@ -26,7 +26,7 @@ class Jaws {
     uint16_t _degOpen = 140;
     uint16_t _degClosed = 90;
     Status _status;
-    uint32_t _msStepTime = 10;
+    uint32_t _msStepTime;
     uint32_t _startMillis;
     uint8_t _degPos;
 };

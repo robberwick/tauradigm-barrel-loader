@@ -4,8 +4,9 @@
 
 #include "Arduino.h"
 
-Pivot::Pivot(uint8_t pin) {
+Pivot::Pivot(uint8_t pin, uint32_t stepTime) {
     _pin = pin;
+    _msStepTime = stepTime;
 }
 
 void Pivot::begin() {
