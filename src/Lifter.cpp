@@ -4,10 +4,13 @@
 
 #include "Arduino.h"
 
-Lifter::Lifter(int pin) {
-    pinMode(pin, OUTPUT);
+Lifter::Lifter(uint8_t pin) {
     _pin = pin;
-    _servo.attach(pin);
+}
+
+void Lifter::begin() {
+    pinMode(_pin, OUTPUT);
+    _servo.attach(_pin);
 }
 
 void Lifter::up() {

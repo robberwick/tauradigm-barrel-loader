@@ -4,26 +4,26 @@
 
 #include "Arduino.h"
 
-Pivot::Pivot(int pin) {
-    pinMode(pin, OUTPUT);
+Pivot::Pivot(uint8_t pin) {
     _pin = pin;
-    _servo.attach(pin);
+}
+
+void Pivot::begin() {
+    pinMode(_pin, OUTPUT);
+    _servo.attach(_pin);
 }
 
 void Pivot::setPosition(Pivot::Position commandedPosition) {
     _commandedPosition = commandedPosition;
     _startMillis = millis();
+    _status = Status::MOVING;
     update();
-}
-
-void Pivot::reset() {
-    _servo.write(_degCentre);
 }
 
 void Pivot::update() {
     uint32_t currMillis = millis();
     uint8_t targetPos;
-    int8_t degStep;
+    uint8_t degStep;
 
     switch (_commandedPosition) {
         case Position::CENTER:
@@ -38,6 +38,7 @@ void Pivot::update() {
             targetPos = _degRed;
             break;
     }
+
     if (_degPos == targetPos) {
         _status = Status::STOPPED;
         return;
@@ -45,6 +46,7 @@ void Pivot::update() {
         if ((currMillis - _startMillis) >= _msStepTime) {
             degStep = (_degPos < targetPos) ? 1 : -1;
             _degPos = _degPos + degStep;
+            _startMillis = currMillis;
             _servo.write(_degPos);
         }
     }

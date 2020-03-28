@@ -16,21 +16,21 @@ class Pivot {
         RED,
         GREEN,
     };
-    Pivot(int pin);
+    Pivot(uint8_t pin);
+    void begin();
     void setPosition(Position);
-    void reset();
     void update();
     Status getStatus();
 
    private:
-    int _pin;
+    uint8_t _pin;
     Servo _servo;
     Position _commandedPosition;
     uint16_t _degRed = 55;
     uint16_t _degGreen = 110;
     uint16_t _degCentre = 82;
     Status _status;
-    uint8_t _msStepTime = 10;
+    uint32_t _msStepTime = 10;
     uint32_t _startMillis;
     uint8_t _degPos;
 };

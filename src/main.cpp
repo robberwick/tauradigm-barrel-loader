@@ -38,13 +38,13 @@ Command currentCommand = Command::STOP;
 
 uint8_t I2C_ADDR = 4;
 
-uint8_t jawsPin = 0;
+uint8_t jawsPin = 12;  //0;
 Jaws jaws(jawsPin);
 
-uint8_t lifterPin = 2;
+uint8_t lifterPin = 11;  //2;
 Lifter lifter(lifterPin);
 
-uint8_t pivotPin = 1;
+uint8_t pivotPin = 10;  //1;
 Pivot pivot(pivotPin);
 
 void receiveEvent(int bytesRead);
@@ -58,6 +58,10 @@ void setup() {
 
     softWire.begin();    // join alternative i2c bus as master
     Serial.begin(9600);  // start serial for output
+
+    jaws.begin();
+    pivot.begin();
+    lifter.begin();
 }
 
 void loop() {
@@ -73,8 +77,6 @@ void receiveEvent(int bytesRead) {
         uint8_t readByte = Wire.read();
 
         if (readByte >= (uint8_t)Command::STOP && readByte <= (uint8_t)Command::RUN) {
-            // Serial.println("Command: ");
-            // Serial.print(readByte);
             currentCommand = (Command)readByte;
         }
     }
@@ -103,7 +105,7 @@ boolean findBarrel() {
 void processStatus() {
     if ((currentCommand == Command::STOP) && (state != State::WAIT && state != State::RESETTING)) {
         lifter.down();
-        pivot.reset();
+        pivot.setPosition(Pivot::Position::CENTER);
         jaws.open();
         state = State::RESETTING;
     }
@@ -161,12 +163,13 @@ void processStatus() {
 
         case State::LIFTING:
             // if the LIFTING TIMEOUT has expired, open the jaws and move to RELEASING
-            if (lifter.getStatus() == Lifter::Status::UP) {
+            if (lifter.getStatus() == Lifter::Status::UP && pivot.getStatus() == Pivot::Status::STOPPED) {
                 // Open the Jaws
                 jaws.open();
                 state = State::RELEASING;
             } else {
                 lifter.update();
+                pivot.update();
             }
 
             break;
@@ -174,7 +177,8 @@ void processStatus() {
         case State::RELEASING:
             if (jaws.getStatus() == Jaws::Status::OPEN) {
                 lifter.down();
-                pivot.reset();
+                pivot.setPosition(Pivot::Position::CENTER);
+                ;
                 state = State::RESETTING;
             } else {
                 jaws.update();

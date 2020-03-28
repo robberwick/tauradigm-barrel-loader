@@ -4,10 +4,13 @@
 
 #include "Arduino.h"
 
-Jaws::Jaws(int pin) {
-    pinMode(pin, OUTPUT);
+Jaws::Jaws(uint8_t pin) {
     _pin = pin;
-    _servo.attach(pin);
+}
+
+void Jaws::begin() {
+    pinMode(_pin, OUTPUT);
+    _servo.attach(_pin);
 }
 
 void Jaws::open() {

@@ -13,19 +13,20 @@ class Lifter {
         LIFTING,
         LOWERING
     };
-    Lifter(int pin);
+    Lifter(uint8_t pin);
+    void begin();
     void up();
     void down();
     void update();
     Status getStatus();
 
    private:
-    int _pin;
+    uint8_t _pin;
     Servo _servo;
     uint16_t _degUp = 55;
     uint16_t _degDown = 123;
     Status _status;
-    uint8_t _msStepTime = 60;
+    uint32_t _msStepTime = 10;  //60;
     uint32_t _startMillis;
     uint8_t _degPos;
 };
