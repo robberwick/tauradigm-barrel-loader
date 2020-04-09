@@ -65,6 +65,7 @@ void receiveEvent(int bytesRead);
 void requestEvent();
 void processStatus();
 void flashColorSensorLed();
+void setColourSensorLED(bool isOn);
 
 void setup() {
     Wire.begin(I2C_ADDR);          // join i2c bus with address #4
@@ -93,11 +94,15 @@ void setup() {
 
 void flashColorSensorLed() {
     for (uint8_t i = 0; i < 3; i++) {
-        digitalWrite(COLOUR_SENSOR_LED_PIN, HIGH);
+        setColourSensorLED(true);
         delay(200);
-        digitalWrite(COLOUR_SENSOR_LED_PIN, LOW);
+        setColourSensorLED(false);
         delay(200);
     }
+}
+
+void setColourSensorLED(bool isOn) {
+    digitalWrite(COLOUR_SENSOR_LED_PIN, isOn);
 }
 
 void loop() {
@@ -167,6 +172,7 @@ void processStatus() {
         case State::WAIT:
             if (currentCommand == Command::RUN) {
                 state = State::LOOKING;
+                setColourSensorLED(true);
             }
             break;
 
@@ -198,6 +204,7 @@ void processStatus() {
                     // set pivot servo to red position
                     pivot.setPosition(Pivot::Position::RED);
                     state = State::LIFTING;
+                    setColourSensorLED(false);
                     break;
 
                 case Colors::GREEN:
@@ -206,6 +213,7 @@ void processStatus() {
                     // set pivot servo to green position
                     pivot.setPosition(Pivot::Position::GREEN);
                     state = State::LIFTING;
+                    setColourSensorLED(false);
                     break;
 
                 case Colors::BLUE:
@@ -246,6 +254,7 @@ void processStatus() {
                 switch (currentCommand) {
                     case Command::RUN:
                         state = State::LOOKING;
+                        setColourSensorLED(true);
                         break;
                     case Command::STOP:
                         state = State::WAIT;
