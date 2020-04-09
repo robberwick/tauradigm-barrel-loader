@@ -1,12 +1,10 @@
 #include <Arduino.h>
 #include <Wire.h>
 
+#include "Adafruit_TCS34725softi2c.h"
 #include "Jaws.h"
 #include "Lifter.h"
 #include "Pivot.h"
-#include "SoftwareWire.h"
-
-SoftwareWire softWire(A0, A1);
 
 enum class State {
     WAIT = 0,
@@ -18,15 +16,29 @@ enum class State {
     RESETTING = 6
 };
 
-enum class Colour {
-    RED,
-    GREEN
-};
-
 enum class Command {
     STOP,
     RUN
 };
+
+Adafruit_TCS34725softi2c tcs = Adafruit_TCS34725softi2c(TCS34725_INTEGRATIONTIME_700MS, TCS34725_GAIN_1X, A0, A1);
+
+typedef struct {  // struct to hold raw color data
+    uint16_t red;
+    uint16_t green;
+    uint16_t blue;
+    uint16_t clear;
+} Color;
+
+enum Colors {
+    OTHER,
+    RED,
+    GREEN,
+    BLUE,
+    UNKNOWN
+};
+
+Colors classifyColour(uint16_t r, uint16_t g, uint16_t b, uint16_t c);
 
 unsigned long GRABBING_TIMEOUT = 50 * 10;
 unsigned long LIFTING_TIMEOUT = 68 * 60;
@@ -56,8 +68,15 @@ void setup() {
     Wire.onReceive(receiveEvent);  // register event
     Wire.onRequest(requestEvent);
 
-    softWire.begin();    // join alternative i2c bus as master
     Serial.begin(9600);  // start serial for output
+
+    if (tcs.begin()) {
+        Serial.println("Found sensor");
+    } else {
+        while (!tcs.begin()) {
+            Serial.println("No TCS34725 found ... check your connections");
+        }
+    }
 
     jaws.begin();
     pivot.begin();
@@ -90,16 +109,32 @@ boolean timeoutHasPassed(unsigned long startMillis, unsigned long timeoutLength)
     return millis() - startMillis >= timeoutLength;
 }
 
-Colour getBarrelColour() {
-    // attempt to do colour recognition stuff here:
+Colors getBarrelColour() {
+    uint16_t clear, red, green, blue;
 
-    // for now though always just return Colour::RED
-    return Colour::RED;
+    tcs.getRawData(&red, &green, &blue, &clear);
+
+    return classifyColour(red, green, blue, clear);
 }
 
 boolean findBarrel() {
-    //TODO Barrel detection stuff
-    return true;
+    Colors colourFound = getBarrelColour();
+    return colourFound == Colors::RED || colourFound == Colors::GREEN;
+}
+
+Colors classifyColour(uint16_t r, uint16_t g, uint16_t b, uint16_t c) {
+    if (min(min(r, g), b) < 1000) {
+        return Colors::UNKNOWN;
+    }
+    uint8_t acceptanceFactor = 1.5;
+    if (r > (acceptanceFactor * g) && (r > (acceptanceFactor * b))) {
+        return Colors::RED;
+    } else if (g > (acceptanceFactor * r) && (g > (acceptanceFactor * b))) {
+        return Colors::GREEN;
+    } else if (b > (acceptanceFactor * r) && (b > (acceptanceFactor * g))) {
+        return Colors::BLUE;
+    }
+    return Colors::OTHER;
 }
 
 void processStatus() {
@@ -119,7 +154,6 @@ void processStatus() {
             break;
 
         case State::LOOKING:
-            // LOOKING FOR BARREL
             if (findBarrel()) {
                 // close jaws
                 jaws.close();
@@ -141,7 +175,7 @@ void processStatus() {
         case State::GRABBED:
             // barrel grabbed - check colour
             switch (getBarrelColour()) {
-                case Colour::RED:
+                case Colors::RED:
                     // Set lifting servo to up position
                     lifter.up();
                     // set pivot servo to red position
@@ -149,17 +183,22 @@ void processStatus() {
                     state = State::LIFTING;
                     break;
 
-                case Colour::GREEN:
+                case Colors::GREEN:
                     // Set lifting servo to up position
                     lifter.up();
                     // set pivot servo to green position
                     pivot.setPosition(Pivot::Position::GREEN);
                     state = State::LIFTING;
                     break;
+
+                case Colors::BLUE:
+                case Colors::OTHER:
+                case Colors::UNKNOWN:
+                default:
+                    break;
             }
 
-            if (getBarrelColour() == Colour::RED)
-                break;
+            break;
 
         case State::LIFTING:
             // if the LIFTING TIMEOUT has expired, open the jaws and move to RELEASING
