@@ -59,9 +59,12 @@ Lifter lifter(lifterPin, 10);  // 60 is the original value from the test rig
 uint8_t pivotPin = 10;  //1;
 Pivot pivot(pivotPin, 10);
 
+uint8_t COLOUR_SENSOR_LED_PIN = 13;
+
 void receiveEvent(int bytesRead);
 void requestEvent();
 void processStatus();
+void flashColorSensorLed();
 
 void setup() {
     Wire.begin(I2C_ADDR);          // join i2c bus with address #4
@@ -70,17 +73,31 @@ void setup() {
 
     Serial.begin(9600);  // start serial for output
 
+    pinMode(COLOUR_SENSOR_LED_PIN, OUTPUT);
+    digitalWrite(COLOUR_SENSOR_LED_PIN, LOW);
+
     if (tcs.begin()) {
         Serial.println("Found sensor");
+
     } else {
         while (!tcs.begin()) {
             Serial.println("No TCS34725 found ... check your connections");
         }
     }
+    flashColorSensorLed();
 
     jaws.begin();
     pivot.begin();
     lifter.begin();
+}
+
+void flashColorSensorLed() {
+    for (uint8_t i = 0; i < 3; i++) {
+        digitalWrite(COLOUR_SENSOR_LED_PIN, HIGH);
+        delay(200);
+        digitalWrite(COLOUR_SENSOR_LED_PIN, LOW);
+        delay(200);
+    }
 }
 
 void loop() {
